@@ -92,4 +92,4 @@ if(commandIs("mute", msg)) {
 
 
 
-client.login('Mzc4MTI0Mjk2NTk1MzA4NTQ1.DOr3Dw.yOz0Q_htOcyi2F4DcP67tt2tbFE');
+client.login('token');
