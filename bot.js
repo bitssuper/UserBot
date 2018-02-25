@@ -45,12 +45,19 @@ client.on('message', message => {
           var WarnType = "Warning 1."
           logChannel.send({ embed: WarnEmbed });
         } else {
-          if(message.member.roles.find("name", "Staff")) {
+          if(message.member.roles.find("name", "Staff" && !message.guild.member(message.mentions.users.first()).roles.find("name", "Warning 2"))) {
           if(message.guild.member(message.mentions.users.first()).roles.find("name", "Warning 1")) {
             message.delete();
             message.guild.member(message.mentions.users.first()).addRole(Warning2);
            var WarnType = "Warning 2."
             logChannel.send({ embed: WarnEmbed });
+          } else {
+            if(message.member.roles.find("name", "Staff")) {
+                if(message.guild.member(message.mentions.users.first()).roles.find("name", "Warning 2")) {
+                  message.delete();
+                  message.guild.member(message.mentions.users.first()).ban(reason);
+                }
+              }
             }
           }
         }
