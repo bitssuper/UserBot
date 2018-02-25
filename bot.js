@@ -1,95 +1,61 @@
-const config = require('./config.json')
+const { prefix, token } = require('./config.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 client.on('ready', () => {
-  console.log("User bot has been launched and equipped with his ban hammer.")
-  client.user.setActivity('Training with the ban hammer.')
+  console.log('Welcome to User Bot, version 1.0.');
+  client.user.setActivity('discord.gg/MyUsernamesThis');
 });
 
-function commandIs(str, msg){
-    return msg.content.toLowerCase().startsWith("!" + str)
-}
+client.on("guildMemberAdd", function(member) {
+    member.guild.channels.find("name", "join-logs").sendMessage(member.toString() + " has joined the server!");
+});
 
-function pluck(array) {
-    return array.map(function(item) { return item["name"]; });
-}
+client.on('message', message => {
+  var args = message.content.substring(prefix.length).split(" ");
 
-function hasRole(mem, role) {
-    if(pluck(mem.roles).includes(role)) {
-        return true;
-    } else {
-        return false;
-    }
-}
+  switch (args[0].toLowerCase()) {
+      case "ping":
+        message.channel.sendMessage("Pong!");
+        break;
+      case "verify":
+        message.channel.sendMessage(message.author.tag + " has succesfully been verified!");
+        message.member.addRole(message.member.guild.roles.find("name", "Verified"));
+        break;
+        case "warn":
+          var reason = args.slice(2).join(' ');
+          var logChannel = message.member.guild.channels.find("name", "mod-logs");
+          var Warning = message.member.guild.roles.find("name", "Warning 1");
+          var Warning2 = message.member.guild.roles.find("name", "Warning 2");
+          var staffRole = message.member.guild.roles.find("name", "Staff");
 
-const BanEmbed = new Discord.RichEmbed()
-.setColor('#0099ff')
-.setAuthor('Ban command usage.', 'https://www.flamingtoast.com/wp-content/uploads/2015/04/ban-hammer-newB-1000x1000.jpg', 'https://discord.gg/MyUsernamesThis')
-.addField('**Banning with username.**', '!ban @username')
-.addField('Banning with UserId', '!ban <@userId>')
-.addField('Banning with UserId example:', '!ban <@1902001316500453504>')
-.setTimestamp()
-.setFooter('User Bot, version 1.0');
+          const WarnEmbed = new Discord.RichEmbed()
+          .setColor('#f22525')
+          .setAuthor('Moderation logs')
+          .addField('Name', message.guild.member(message.mentions.users.first()))
+          .addField('Punishment', 'Warning.')
+          .addField('Warning type', WarnType)
+          .addField('Reason', reason)
+          .setTimestamp()
+          .setFooter('User Bot, version 1.0')
 
-const KickEmbed = new Discord.RichEmbed()
-.setColor('#0099ff')
-.setAuthor('Kick command usage.', 'https://www.flamingtoast.com/wp-content/uploads/2015/04/ban-hammer-newB-1000x1000.jpg', 'https://discord.gg/MyUsernamesThis')
-.addField('**Kicking with username.**', '!kick @username')
-.addField('Kicking with UserId', '!kick <@userId>')
-.addField('Kicking with UserId example:', '!kick <@1902001316500453504>')
-.setTimestamp()
-.setFooter('User Bot, version 1.0');
-
-client.on('message', msg => {
-	var args = msg.content.split(/[ ]+/);
-    if(commandIs("kick", msg)) {
-	  if(hasRole(msg.member, "Staff")) {
-		if(args.length == 1) {
-			msg.channel.send({ embed: KickEmbed });
-		} else {
-			msg.guild.member(msg.mentions.users.first()).kick();
-			msg.reply('**User has been executed!**');
-		}
-	} else {
-			msg.reply('You do not have the right permissions to execute this command.');
-		}
-}
-	var args = msg.content.split(/[ ]+/);
-    if(commandIs("ban", msg)) {
-	  if(hasRole(msg.member, "Police Chiefs" || hasRole(msg.member, "Police Supervisor" || hasRole(msg.member, "not camping cop")))) {
-		if(args.length == 1) {
-      msg.channel.send({ embed: BanEmbed });
-		} else {
-      let reason = args.slice(1).join(' ');
-			msg.guild.member(msg.mentions.users.first()).ban(reason);
-			msg.reply('**Haha, nice swing!**');
-		}
-	} else {
-			msg.reply('You do not have the right permissions to execute this command.');
-		}
-}
-if(commandIs("mute", msg)) {
-  if(hasRole(msg.member, "Staff")) {
-    if(args.length == 1) {
-    } else {
-      let member = msg.member
-      client.user.addRole('Muted', msg.member);
-      }
-    }
-  }
-	var args = msg.content.split(/[ ]+/);
-	if(commandIs("warn", msg)) {
-		if(hasRole(msg.member, "Staff")) {
-			if(args.length == 1) {
-			} else {
-				let member = msg.member
-				client.user.addRole('Warning 1', msg.member);
+          if(message.member.roles.find("name", "Staff") && !message.guild.member(message.mentions.users.first()).roles.find("name", "Warning 1")) {
+          message.guild.member(message.mentions.users.first()).addRole(Warning);
+          message.delete();
+          var WarnType = "Warning 1."
+          logChannel.send({ embed: WarnEmbed });
+        } else {
+          if(message.member.roles.find("name", "Staff")) {
+          if(message.guild.member(message.mentions.users.first()).roles.find("name", "Warning 1")) {
+            message.delete();
+            message.guild.member(message.mentions.users.first()).addRole(Warning2);
+           var WarnType = "Warning 2."
+            logChannel.send({ embed: WarnEmbed });
+            }
+          }
         }
-			}
-		}
+        break;
+  }
 });
 
-
-
-client.login('token');
+client.login(token)
