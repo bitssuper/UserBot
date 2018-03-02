@@ -10,7 +10,7 @@ client.on('ready', () => {
 });
 
 client.on("guildMemberAdd", function(member) {
-    member.guild.channels.find("name", "join-logs").sendMessage("Welcome to MyUsernamesThis Discord server " + member.toString() + ", please read #rules-and-info for information about how to get access to the rest of the Discord server.");
+    member.guild.channels.find("name", "join-logs").sendMessage("Welcome to MyUsernamesThis Discord server " + member.toString() + ", please read #welcome for information about how to get access to the rest of the Discord server.");
 });
 
 client.on('message', message => {
@@ -38,10 +38,15 @@ client.on('message', message => {
           var Warning2 = message.member.guild.roles.find("name", "Warning 2");
           var staffRole = message.member.guild.roles.find("name", "Staff");
 
+          if(args.length === 1) {
+            message.delete();
+            break;
+          }
           if(reason.length === 0) {
             reason = "undefined"
+            message.delete();
+            message.reply('You did not define a reason.');
           }
-
           const WarnEmbed = new Discord.RichEmbed()
           .setColor('#f22525')
           .setAuthor('Moderation logs', message.author.avatarURL)
@@ -93,10 +98,13 @@ client.on('message', message => {
         var WarnMember = message.guild.member(message.mentions.users.first());
         var logChannel = message.member.guild.channels.find("name", "mod-logs");
 
+        if(args.length === 1) {
+          message.delete();
+          break;
+        }
         if(reason.length === 0) {
           reason = "undefined"
         }
-
         const KickEmbed = new Discord.RichEmbed()
         .setColor('#f22525')
         .setAuthor('Moderation logs', message.author.avatarURL)
@@ -121,7 +129,7 @@ client.on('message', message => {
         var reason = args.slice(2).join(' ');
         var WarnMember = message.guild.member(message.mentions.users.first());
         var logChannel = message.member.guild.channels.find("name", "mod-logs");
-        var AuthorAvatar = message.Author.avatarURL
+        var AuthorAvatar = message.author.avatarURL
 
         if(reason.length === 0) {
           reason = "undefined"
@@ -130,22 +138,31 @@ client.on('message', message => {
 
         const BanEmbed = new Discord.RichEmbed()
         .setColor('#f22525')
-        .setAuthor('Moderation logs', AuthorAvatar)
+        .setAuthor('Moderation logs', message.author.avatarURL)
         .addField('Name', message.guild.member(message.mentions.users.first()))
         .addField('Punishment', 'Ban')
         .addField('Reason', reason)
         .setTimestamp()
         .setFooter('User Bot, version 1.0')
 
+        if(args.length === 1) {
+          message.delete();
+          break;
+        }
+        if(reason.length === 0) {
+          message.delete();
+          message.reply('You did not define a reason.');
+          break;
+        }
         if(!message.member.roles.find("name", "Staff")) {
           message.reply('You do not have the right permissions to execute this command!');
         }
-        if(message.member.roles.find("name", "Staff") && !WarnMember.roles.find("name", "Staff") && !reason.length === 0) {
+        if(message.member.roles.find("name", "Staff") && !WarnMember.roles.find("name", "Staff")) {
           message.delete();
           WarnMember.ban(reason);
           logChannel.send({ embed: BanEmbed });
-          break;
        }
+     break;
        case "clear":
 
        var amount = args.slice(1).join(' ');
@@ -170,7 +187,7 @@ client.on('message', message => {
 
        var smessage = args.slice(1).join(' ');
        var sargs = args.slice(2).join(' ');
-       var schannel = message.member.guild.channels.find("name", "dev-testing");
+       var schannel = message.member.guild.channels.find("name", "testers");
 
        if (smessage.length === 0) {
          message.reply('Please define a message to be said.')
@@ -196,4 +213,4 @@ client.on('message', message => {
    }
 });
 
-client.login(token)
+client.login(process.env.BOT_TOKEN)
